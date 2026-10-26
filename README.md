@@ -156,7 +156,7 @@ The screenshot confirmed that both promotion codes were recorded twice and the f
 
 ### Successful zero-cost checkout
 
-![Coupon reuse — NEWS30 x2, NIGHT20 x2, total EUR 0.00](Screenshot%202026-10-25%20171753_2.png)
+![Coupon reuse — NEWS30 x2, NIGHT20 x2, total EUR 0.00](E2E60ECF-5B82-4206-9617-93A8BBEE2DE7.png)
 
 **Screenshot observations:**
 
