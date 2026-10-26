@@ -167,8 +167,6 @@ The screenshot confirmed that both promotion codes were recorded twice and the f
 - Final total: **€0.00**
 - Complete Order button available
 
-> **Note:** The image will appear after the screenshot has been uploaded to the root of this GitHub repository with the exact filename shown in the Markdown link.
-
 ---
 
 ## 🚩 5. Challenge Flag
