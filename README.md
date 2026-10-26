@@ -1,115 +1,93 @@
-Intigriti October 2026 CTF — Coupon Reuse via Case-Sensitive Validation
+# 🏆 Intigriti October 2026 CTF — Coupon Reuse Bypass
 
-Challenge: Intigriti October 2026 CTF
-Challenge URL: https://challenge-1026.challenges.intigriti.io
-Category: Business Logic / Coupon Validation Bypass
-Status: Solved
-Author: raffaele365
+![Status](https://img.shields.io/badge/CTF-SOLVED-brightgreen)
+![Category](https://img.shields.io/badge/Category-Business%20Logic-blue)
 
-TL;DR
+**Author:** raffaele365  
+**Challenge:** Intigriti October 2026 CTF  
+**Target:** https://challenge-1026.challenges.intigriti.io  
+**Vulnerability:** Coupon reuse through inconsistent case handling
 
-The challenge contained a coupon validation flaw: the application treated coupon codes as case-insensitive when applying discounts, but the duplicate-use validation distinguished uppercase and lowercase characters.
+---
 
-By submitting the same logical coupon codes with different capitalization, I was able to apply their discounts more than once, reduce the checkout total to €0, and obtain the CTF flag.
+## 🎯 TL;DR
 
-1. The Vulnerability
+The challenge contained a business logic flaw in coupon validation.
 
-Coupon codes should have a consistent identity throughout the discount workflow.
+The application accepted differently capitalized versions of the same coupon codes, allowing discounts to be reused and the checkout total to reach **€0**.
 
-In this challenge, however, two representations of the same coupon were treated differently by the validation logic:
+## 🔍 Vulnerability
 
-* NIGHT20 and night20
-* NEWS30 and news30
+The coupon system did not consistently treat uppercase and lowercase versions as the same logical coupon.
 
-The application recognized these variations as valid discount codes, while the duplicate-use check failed to identify them as already applied.
+| Original coupon | Alternative representation |
+|---|---|
+| `NIGHT20` | `night20` |
+| `NEWS30` | `news30` |
 
-This created a business logic vulnerability that allowed repeated application of discounts that should have been restricted.
+This inconsistency allowed the intended coupon usage restrictions to be bypassed.
 
-2. Exploitation Steps
+## 💥 Exploitation
 
-Step 1 — Add the target product
+### Step 1 — Open the challenge
 
-Open the challenge application and add the product midnight-vault to the cart.
+Navigate to:
 
-Step 2 — Apply the original coupons
+```text
+https://challenge-1026.challenges.intigriti.io
+```
 
-Apply the following coupon codes:
+### Step 2 — Add the target product
 
+Add the `midnight-vault` product to the cart.
+
+### Step 3 — Apply the original coupon codes
+
+```text
 NIGHT20
 NEWS30
+```
 
-Step 3 — Reuse the coupons with different capitalization
+### Step 4 — Reapply using lowercase variants
 
-Submit the lowercase variants:
-
+```text
 night20
 news30
+```
 
-The application accepts the differently capitalized coupon strings instead of treating them as duplicates of the previously applied discounts.
+The application accepted the differently capitalized codes instead of rejecting them as duplicates.
 
-Step 4 — Complete the checkout
+### Step 5 — Complete checkout
 
-After applying the coupon variations, the total reaches €0.
+The combined discounts reduced the total to **€0**. Completing the checkout revealed the flag.
 
-Proceed through the checkout flow to complete the challenge and retrieve the flag.
+## 🚩 Flag
 
-3. Proof of Concept
-
-The essential payload sequence is:
-
-NIGHT20
-NEWS30
-night20
-news30
-
-Observed result: The application allows the same logical discounts to be applied more than once, resulting in a zero-cost checkout.
-
-Flag:
-
+```text
 INTIGRITI{094638e6-ba2f-4c50-8bb4-41ced0d5debd}
+```
 
-4. Root Cause Analysis
+## 🧠 Root Cause
 
-The vulnerability arises from inconsistent coupon normalization.
+The observed behavior is consistent with inconsistent coupon-code normalization between validation and discount application.
 
-The application effectively treats NIGHT20 and night20 as equivalent for discount application, but not for duplicate detection.
+For example, a system may consider `NIGHT20` and `night20` different during duplicate detection while recognizing both as the same discount.
 
-A secure implementation should normalize coupon identifiers consistently before performing both validation and discount application.
+The exact server-side implementation was not available, so this is a root-cause hypothesis based on the observed behavior.
 
-For example:
+## 🛡️ Remediation
 
-const normalizedCode = submittedCode.trim().toUpperCase();
-if (appliedCoupons.has(normalizedCode)) {
-  throw new Error("Coupon already applied");
-}
-appliedCoupons.add(normalizedCode);
+- Normalize coupon identifiers consistently before validation and storage.
+- Enforce coupon uniqueness and usage limits server-side.
+- Recalculate checkout totals on the server.
+- Add regression tests for uppercase, lowercase and mixed-case coupon codes.
 
-This simplified example illustrates the required consistency. In a real application, coupon validity and usage limits should also be enforced server-side.
+## 📌 Impact
 
-5. Security Impact
+In a real e-commerce system, a similar flaw could allow users to reuse restricted discounts, bypass stacking rules and purchase products for less than their intended price.
 
-In a real e-commerce application, this flaw could allow an attacker to:
+## 🏁 Conclusion
 
-* Reuse single-use or non-stackable discounts.
-* Combine discounts beyond the intended limits.
-* Reduce an order total below the intended price.
-* Cause financial losses if checkout accepts the manipulated total.
+This challenge demonstrates that a small inconsistency in string handling can lead to a significant business logic bypass.
 
-The key lesson is that business logic vulnerabilities do not always require complex injection payloads. A mismatch in how an application compares and processes user-controlled values can be enough to bypass important restrictions.
-
-6. Remediation
-
-The application should:
-
-1. Normalize coupon codes consistently before validation and storage.
-2. Enforce coupon uniqueness and usage restrictions on the server.
-3. Recalculate the final payable amount using trusted server-side pricing rules.
-4. Add regression tests for uppercase, lowercase, and mixed-case coupon submissions.
-
-Conclusion
-
-This challenge demonstrated how inconsistent case handling can turn a seemingly minor validation mistake into a complete checkout bypass.
-
-The successful exploit relied on identifying the difference between coupon identity validation and discount application, then using alternative capitalization to apply the same logical discounts repeatedly.
-
-Thanks to Intigriti for the October 2026 challenge!
+**Thanks to Intigriti for the challenge!**
